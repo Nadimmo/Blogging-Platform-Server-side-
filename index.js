@@ -13,7 +13,7 @@ app.use(cors({
 }))
 
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.rrkijcq.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -34,19 +34,20 @@ async function run() {
         // await client.connect();
         app.get('/blogs', async (req, res) => {
             const blogs = await CollectionOfBlogs.find().toArray();
-            res.json(blogs);
+            res.send(blogs);
         });
 
         app.get('/blogs/:id', async (req, res) => {
             const id = req.params.id;
-            const blog = await CollectionOfBlogs.findOne({ _id: new ObjectId(id) });
-            res.json(blog);
+            const filter = {_id: new ObjectId(id)}
+            const blog = await CollectionOfBlogs.findOne(filter);
+            res.send(blog);
         });
         
         app.post('/blogs', async (req, res) => {
             const blog = req.body;
             const result = await CollectionOfBlogs.insertOne(blog);
-            res.json(result);
+            res.send(result);
         });
         
        
