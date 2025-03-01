@@ -32,6 +32,11 @@ async function run() {
         // Connect the client to the server	(optional starting in v4.7)
 
         // await client.connect();
+        app.post('/blogs', async (req, res) => {
+            const blog = req.body;
+            const result = await CollectionOfBlogs.insertOne(blog);
+            res.send(result);
+        });
         app.get('/blogs', async (req, res) => {
             const blogs = await CollectionOfBlogs.find().toArray();
             res.send(blogs);
@@ -44,10 +49,11 @@ async function run() {
             res.send(blog);
         });
         
-        app.post('/blogs', async (req, res) => {
-            const blog = req.body;
-            const result = await CollectionOfBlogs.insertOne(blog);
-            res.send(result);
+        app.get('/blog', async (req, res) => {
+            const email = req.query.email;
+            const filter = {email: email}
+            const blog = await CollectionOfBlogs.find(filter).toArray();
+            res.send(blog);
         });
         
        
