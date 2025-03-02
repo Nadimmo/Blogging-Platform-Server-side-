@@ -28,6 +28,7 @@ const client = new MongoClient(uri, {
 async function run() {
     // Connect to the MongoDB server
     const CollectionOfBlogs = client.db("BloggingPlatformDB").collection("blogsDB");
+    const CollectionOfReview = client.db("BloggingPlatformDB").collection("reviewDB");
     try {
         // Connect the client to the server	(optional starting in v4.7)
 
@@ -56,6 +57,17 @@ async function run() {
             res.send(blog);
         });
         
+        //review related api
+        app.post('/review', async (req, res) => {
+            const review = req.body;
+            const result = await CollectionOfReview.insertOne(review);
+            res.send(result);
+        });
+        app.get('/review', async(req,res)=>{
+            const review = req.body;
+            const result = await CollectionOfReview.find(review).toArray();
+            res.send(result);
+        })
        
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
