@@ -50,6 +50,13 @@ async function run() {
             res.send(blog);
         });
         
+        app.delete("/blogs/:id", async(req,res)=>{
+            const id = req.params.id;
+            const filter = {_id: new ObjectId(id)}
+            const result = await CollectionOfBlogs.deleteOne(filter)
+            res.send(result)
+        })
+        //showing blog of a specific user
         app.get('/blog', async (req, res) => {
             const email = req.query.email;
             const filter = {email: email}
