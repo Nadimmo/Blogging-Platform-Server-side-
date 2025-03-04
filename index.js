@@ -45,37 +45,67 @@ async function run() {
 
         app.get('/blogs/:id', async (req, res) => {
             const id = req.params.id;
-            const filter = {_id: new ObjectId(id)}
+            const filter = { _id: new ObjectId(id) }
             const blog = await CollectionOfBlogs.findOne(filter);
             res.send(blog);
         });
-        
-        app.delete("/blogs/:id", async(req,res)=>{
+
+        app.delete("/blogs/:id", async (req, res) => {
             const id = req.params.id;
-            const filter = {_id: new ObjectId(id)}
+            const filter = { _id: new ObjectId(id) }
             const result = await CollectionOfBlogs.deleteOne(filter)
             res.send(result)
         })
         //showing blog of a specific user
         app.get('/blog', async (req, res) => {
             const email = req.query.email;
-            const filter = {email: email}
+            const filter = { email: email }
             const blog = await CollectionOfBlogs.find(filter).toArray();
             res.send(blog);
         });
-        
+
+        app.get("/blog/:id", async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) }
+            const blog = await CollectionOfBlogs.findOne(filter)
+            res.send(blog)
+        })
+
+        //update my blog
+        app.put("/blog/:id", async (req, res) => {
+            const id = req.params.id;
+            const updatedBlog = req.body;
+            const filter = { _id: new ObjectId(id) }
+            const updateDoc = {
+                $set: {
+                    title: updatedBlog.title,
+                    short_description: updatedBlog.short_description,
+                    blog_details: updatedBlog.blog_details,
+                    category: updatedBlog.category,
+                    author_name: updatedBlog.author_name,
+                    email: updatedBlog.email,
+                    date_time: updatedBlog.date_time,
+                    image: updatedBlog.image,
+                    likes: 0
+                }
+            }
+            const result = await CollectionOfBlogs.updateOne(filter, updateDoc)
+            res.send(result)
+        })
+
+
         //review related api
         app.post('/review', async (req, res) => {
             const review = req.body;
             const result = await CollectionOfReview.insertOne(review);
             res.send(result);
         });
-        app.get('/review', async(req,res)=>{
+        app.get('/review', async (req, res) => {
             const review = req.body;
             const result = await CollectionOfReview.find(review).toArray();
             res.send(result);
         })
-       
+
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
