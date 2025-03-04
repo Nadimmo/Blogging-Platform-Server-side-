@@ -29,6 +29,7 @@ async function run() {
     // Connect to the MongoDB server
     const CollectionOfBlogs = client.db("BloggingPlatformDB").collection("blogsDB");
     const CollectionOfReview = client.db("BloggingPlatformDB").collection("reviewDB");
+    const CollectionOfContact = client.db("BloggingPlatformDB").collection("contactDB");
     try {
         // Connect the client to the server	(optional starting in v4.7)
 
@@ -106,6 +107,19 @@ async function run() {
             res.send(result);
         })
 
+        //contact related api
+        app.post('/contact', async (req, res) => {
+            const contact = req.body;
+            const result = await CollectionOfContact.insertOne(contact);
+            res.send(result);
+        });
+        app.get('/contact', async (req, res) => {
+            const contact = req.body;
+            const result = await CollectionOfContact.find(contact).toArray();
+            res.send(result);
+        })
+
+        
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
