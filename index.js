@@ -121,16 +121,21 @@ async function run() {
         })
 
         //comment related api
-        app.post('/comment', async(req,res)=>{
-            const comment = req.body;
-            const result = await CollectionOfComment.insertOne(comment);
+        app.put('/blogs/:id', async(req,res)=>{
+            const id = req.params.id;
+            const updatedBlog = req.body;
+            const filter = {_id: new ObjectId(id)}
+            const updateDoc = {
+                $set: {
+                    comment: updatedBlog.comment,
+                    date_Of_comment: updatedBlog.date_Of_comment,
+                    comment_user: updatedBlog.comment_user
+                }
+            }
+            const result = await CollectionOfBlogs.updateOne(filter, updateDoc)
             res.send(result)
         })
-        app.get('/comment', async(req,res)=>{
-            const comment = req.body;
-            const result = await CollectionOfComment.find(comment).toArray();
-            res.send(result)
-        })
+        
         
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
