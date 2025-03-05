@@ -30,6 +30,7 @@ async function run() {
     const CollectionOfBlogs = client.db("BloggingPlatformDB").collection("blogsDB");
     const CollectionOfReview = client.db("BloggingPlatformDB").collection("reviewDB");
     const CollectionOfContact = client.db("BloggingPlatformDB").collection("contactDB");
+    const CollectionOfComment = client.db("BloggingPlatformDB").collection("commentDB");
     try {
         // Connect the client to the server	(optional starting in v4.7)
 
@@ -119,6 +120,17 @@ async function run() {
             res.send(result);
         })
 
+        //comment related api
+        app.post('/comment', async(req,res)=>{
+            const comment = req.body;
+            const result = await CollectionOfComment.insertOne(comment);
+            res.send(result)
+        })
+        app.get('/comment', async(req,res)=>{
+            const comment = req.body;
+            const result = await CollectionOfComment.find(comment).toArray();
+            res.send(result)
+        })
         
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
