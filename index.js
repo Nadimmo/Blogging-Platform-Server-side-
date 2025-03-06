@@ -30,6 +30,7 @@ async function run() {
     const CollectionOfBlogs = client.db("BloggingPlatformDB").collection("blogsDB");
     const CollectionOfReview = client.db("BloggingPlatformDB").collection("reviewDB");
     const CollectionOfContact = client.db("BloggingPlatformDB").collection("contactDB");
+    const CollectionOfSaveBlogs = client.db("BloggingPlatformDB").collection("saveBlogsDB");
     try {
         // Connect the client to the server	(optional starting in v4.7)
 
@@ -119,10 +120,39 @@ async function run() {
             res.send(result);
         })
 
+        //save blogs related api
+        app.post('/save-blogs', async (req, res) => {
+            const { blogId, email } = req.body;  // Fix destructuring
         
+            if (!blogId || !email) {
+                return res.status(400).send('Missing blogId or email');
+            }
         
+            const filter = { blogId, email }; // Ensure user can save different blogs
+            const existing = await CollectionOfSaveBlogs.findOne(filter); // Use findOne()
         
+            if (existing) {
+                return res.status(400).send('Blog already saved');
+            }
         
+            const result = await CollectionOfSaveBlogs.insertOne({ blogId, email });
+            res.send(result);
+        });
+        
+
+        app.get('/saved-blogs', async (req, res) => {
+            const email = req.query.email;
+            const savedBlogs = await CollectionOfSaveBlogs.find({ email }).toArray();
+            res.send(savedBlogs);
+        });
+
+
+
+
+
+
+
+
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
