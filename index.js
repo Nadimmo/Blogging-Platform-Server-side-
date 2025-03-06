@@ -127,28 +127,21 @@ async function run() {
             if (!blogId || !email) {
                 return res.status(400).send('Missing blogId or email');
             }
-        
             const filter = { blogId, email }; // Ensure user can save different blogs
             const existing = await CollectionOfSaveBlogs.findOne(filter); // Use findOne()
-        
             if (existing) {
                 return res.status(400).send('Blog already saved');
             }
-        
+    
             const result = await CollectionOfSaveBlogs.insertOne({ blogId, email });
             res.send(result);
         });
-        
-
+    
         app.get('/saved-blogs', async (req, res) => {
             const email = req.query.email;
             const savedBlogs = await CollectionOfSaveBlogs.find({ email }).toArray();
             res.send(savedBlogs);
         });
-
-
-
-
 
 
 
