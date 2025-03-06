@@ -30,7 +30,6 @@ async function run() {
     const CollectionOfBlogs = client.db("BloggingPlatformDB").collection("blogsDB");
     const CollectionOfReview = client.db("BloggingPlatformDB").collection("reviewDB");
     const CollectionOfContact = client.db("BloggingPlatformDB").collection("contactDB");
-    const CollectionOfComment = client.db("BloggingPlatformDB").collection("commentDB");
     try {
         // Connect the client to the server	(optional starting in v4.7)
 
@@ -120,21 +119,8 @@ async function run() {
             res.send(result);
         })
 
-        //comment related api
-        app.put('/blogs/:id', async(req,res)=>{
-            const id = req.params.id;
-            const updatedBlog = req.body;
-            const filter = {_id: new ObjectId(id)}
-            const updateDoc = {
-                $set: {
-                    comment: updatedBlog.comment,
-                    date_Of_comment: updatedBlog.date_Of_comment,
-                    comment_user: updatedBlog.comment_user
-                }
-            }
-            const result = await CollectionOfBlogs.updateOne(filter, updateDoc)
-            res.send(result)
-        })
+        
+        
         
         
         // Send a ping to confirm a successful connection
