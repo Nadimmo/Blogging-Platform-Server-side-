@@ -31,6 +31,7 @@ async function run() {
     const CollectionOfReview = client.db("BloggingPlatformDB").collection("reviewDB");
     const CollectionOfContact = client.db("BloggingPlatformDB").collection("contactDB");
     const CollectionOfSaveBlogs = client.db("BloggingPlatformDB").collection("saveBlogsDB");
+    const CollectionOfAllUsers = client.db("BloggingPlatformDB").collection("usersDB");
     try {
         // Connect the client to the server	(optional starting in v4.7)
 
@@ -40,6 +41,7 @@ async function run() {
             const result = await CollectionOfBlogs.insertOne(blog);
             res.send(result);
         });
+        
         app.get('/blogs', async (req, res) => {
             const blogs = await CollectionOfBlogs.find().toArray();
             res.send(blogs);
@@ -142,6 +144,22 @@ async function run() {
             const savedBlogs = await CollectionOfSaveBlogs.find({ email }).toArray();
             res.send(savedBlogs);
         });
+
+        //user related api
+        app.post('/users', async (req, res) => {
+            const user = req.body;
+            const existing = await CollectionOfAllUsers.findOne({ email: user.email });
+            if (existing) {
+                return res.status(400).send('User already exists');
+            }
+            const result = await CollectionOfAllUsers.insertOne(user);
+            res.send(result);
+        });
+
+        app.get('/users', async(req,res)=>{
+            const users = await CollectionOfAllUsers.find().toArray();
+            res.send(users);
+        })
 
 
 
