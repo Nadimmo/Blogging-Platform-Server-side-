@@ -1,15 +1,16 @@
-const express = require("express")
+const express = require('express')
 const app = express()
-const cors = require("cors")
+const cors = require('cors')
 const dotenv = require("dotenv")
 dotenv.config()
 const port = process.env.PORT || 5000;
 
 app.use(express.json())
 app.use(cors({
-    origin: [
-        "http://localhost:5173",
-    ],
+    origin: ["https://blogging-platform-5850d.firebaseapp.com/", "https://blogging-platform-5850d.web.app/", "http://localhost:5173"],
+    methods: "GET, POST, PUT, DELETE",
+    credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization"]
 }))
 
 
@@ -41,7 +42,7 @@ async function run() {
             const result = await CollectionOfBlogs.insertOne(blog);
             res.send(result);
         });
-        
+
         app.get('/blogs', async (req, res) => {
             const blogs = await CollectionOfBlogs.find().toArray();
             res.send(blogs);
@@ -125,7 +126,7 @@ async function run() {
         //save blogs related api
         app.post('/save-blogs', async (req, res) => {
             const { blogId, email } = req.body;  // Fix destructuring
-        
+
             if (!blogId || !email) {
                 return res.status(400).send('Missing blogId or email');
             }
@@ -134,11 +135,11 @@ async function run() {
             if (existing) {
                 return res.status(400).send('Blog already saved');
             }
-    
+
             const result = await CollectionOfSaveBlogs.insertOne({ blogId, email });
             res.send(result);
         });
-    
+
         app.get('/saved-blogs', async (req, res) => {
             const email = req.query.email;
             const savedBlogs = await CollectionOfSaveBlogs.find({ email }).toArray();
@@ -148,7 +149,8 @@ async function run() {
         //user related api
         app.post('/users', async (req, res) => {
             const user = req.body;
-            const existing = await CollectionOfAllUsers.findOne({ email: user.email });
+            const email = { email: user.email }
+            const existing = await CollectionOfAllUsers.findOne(email);
             if (existing) {
                 return res.status(400).send('User already exists');
             }
@@ -156,9 +158,10 @@ async function run() {
             res.send(result);
         });
 
-        app.get('/users', async(req,res)=>{
-            const users = await CollectionOfAllUsers.find().toArray();
-            res.send(users);
+        app.get('/users', async (req, res) => {
+            const users = req.body;
+            const result = await CollectionOfAllUsers.find(users).toArray();
+            res.send(result);
         })
 
 
