@@ -33,6 +33,7 @@ async function run() {
     const CollectionOfContact = client.db("BloggingPlatformDB").collection("contactDB");
     const CollectionOfSaveBlogs = client.db("BloggingPlatformDB").collection("saveBlogsDB");
     const CollectionOfAllUsers = client.db("BloggingPlatformDB").collection("usersDB");
+    const CollectionOfProfile = client.db("BloggingPlatformDB").collection("profilesDB");
     try {
         // Connect the client to the server	(optional starting in v4.7)
 
@@ -115,6 +116,19 @@ async function run() {
             const review = req.body;
             const result = await CollectionOfReview.find(review).toArray();
             res.send(result);
+        })
+
+        //profile api
+        app.post('/profile', async (req, res) => {
+            const profile = req.body;
+            const result = await CollectionOfProfile.insertOne(profile);
+            res.send(result);
+        })
+        app.get("/profile", async(req,res)=>{
+            const user = req.query;
+            const filter = {email: user.email}
+            const result = await CollectionOfProfile.find(filter).toArray()
+            res.send(result)
         })
 
         //contact related api
