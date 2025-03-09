@@ -55,6 +55,12 @@ async function run() {
             res.send(blog);
         });
 
+        //get latest blogs
+        app.get('/latest-blogs', async(req,res)=>{
+            const blogs = await CollectionOfBlogs.find().sort({date_time:-1}).limit(5).toArray();
+            res.send(blogs);
+        })
+
         app.delete("/blogs/:id", async (req, res) => {
             const id = req.params.id;
             const filter = { _id: new ObjectId(id) }
