@@ -56,18 +56,18 @@ async function run() {
             res.send(blog);
         });
 
-        //get latest blogs
-        app.get('/latest-blogs', async(req,res)=>{
-            const blogs = await CollectionOfBlogs.find().sort({date_time:-1}).limit(5).toArray();
-            res.send(blogs);
-        })
-
         app.delete("/blogs/:id", async (req, res) => {
             const id = req.params.id;
             const filter = { _id: new ObjectId(id) }
             const result = await CollectionOfBlogs.deleteOne(filter)
             res.send(result)
         })
+        //get latest blogs
+        app.get('/latest-blogs', async (req, res) => {
+            const blogs = await CollectionOfBlogs.find().sort({ date_time: -1 }).limit(5).toArray();
+            res.send(blogs);
+        })
+
         //showing blog of a specific user
         app.get('/blog', async (req, res) => {
             const email = req.query.email;
@@ -75,14 +75,12 @@ async function run() {
             const blog = await CollectionOfBlogs.find(filter).toArray();
             res.send(blog);
         });
-
         app.get("/blog/:id", async (req, res) => {
             const id = req.params.id;
             const filter = { _id: new ObjectId(id) }
             const blog = await CollectionOfBlogs.findOne(filter)
             res.send(blog)
         })
-
         //update my blog
         app.put("/blog/:id", async (req, res) => {
             const id = req.params.id;
@@ -124,10 +122,37 @@ async function run() {
             const result = await CollectionOfProfile.insertOne(profile);
             res.send(result);
         })
-        app.get("/profile", async(req,res)=>{
+        //get profile of a specific user
+        app.get("/profile", async (req, res) => {
             const user = req.query;
-            const filter = {email: user.email}
+            const filter = { email: user.email }
             const result = await CollectionOfProfile.find(filter).toArray()
+            res.send(result)
+        })
+        app.get("/profiles", async (req, res) => {
+            const user = req.body;
+            const result = await CollectionOfProfile.find(user).toArray()
+            res.send(result)
+        })
+        app.get("/profiles/:id", async (req, res) => {
+            const Id = req.params.id;
+            const filter = {_id: new ObjectId(Id)} 
+            const result = await CollectionOfProfile.findOne(filter)
+            res.send(result)
+        })
+        //update specific profile
+        app.put("/profiles/:id", async (req, res) => {
+            const Id = req.params.id;
+            const updatedProfile = req.body;
+            const filter = { _id: new ObjectId(Id) }
+            const updateDoc = {
+                $set: {
+                    name: updatedProfile.name,
+                    bio: updatedProfile.bio,
+                    designation: updatedProfile.designation
+                }
+            }
+            const result = await CollectionOfProfile.updateOne(filter, updateDoc)
             res.send(result)
         })
 
@@ -159,7 +184,6 @@ async function run() {
             const result = await CollectionOfSaveBlogs.insertOne({ blogId, email });
             res.send(result);
         });
-
         app.get('/saved-blogs', async (req, res) => {
             const email = req.query.email;
             const savedBlogs = await CollectionOfSaveBlogs.find({ email }).toArray();
@@ -177,16 +201,14 @@ async function run() {
             const result = await CollectionOfAllUsers.insertOne(user);
             res.send(result);
         });
-
         app.get('/users', async (req, res) => {
             const users = req.body;
             const result = await CollectionOfAllUsers.find(users).toArray();
             res.send(result);
         })
-
-        app.delete("/users/:id", async(req,res)=>{
+        app.delete("/users/:id", async (req, res) => {
             const Id = req.params.id;
-            const filter = {_id : new ObjectId(Id)}
+            const filter = { _id: new ObjectId(Id) }
             const result = await CollectionOfAllUsers.deleteOne(filter)
             res.send(result)
         })
