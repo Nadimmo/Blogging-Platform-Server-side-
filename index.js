@@ -127,6 +127,20 @@ async function run() {
             const result = await CollectionOfReview.deleteOne(filter)
             res.send(result)
         })
+        app.put("/review/:id", async (req, res) => {
+            const id = req.params.id;
+            const updatedReview = req.body;
+            const filter = { _id: new ObjectId(id) }
+            const updateDoc = {
+                $set: {
+                    name: updatedReview.name,
+                    designation: updatedReview.designation,
+                    review: updatedReview.review
+                }
+            }
+            const result = await CollectionOfReview.updateOne(filter, updateDoc)
+            res.send(result)
+        })
 
         //profile api
         app.post('/profile', async (req, res) => {
