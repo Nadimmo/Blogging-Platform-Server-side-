@@ -115,6 +115,18 @@ async function run() {
             const result = await CollectionOfReview.find(review).toArray();
             res.send(result);
         })
+        app.get("/review/:id", async (req, res) => {
+            const Id = req.params.id;
+            const filter = {_id: new ObjectId(Id)}
+            const result = await CollectionOfReview.findOne(filter)
+            res.send(result)
+        })
+        app.delete("/review/:id", async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) }
+            const result = await CollectionOfReview.deleteOne(filter)
+            res.send(result)
+        })
 
         //profile api
         app.post('/profile', async (req, res) => {
