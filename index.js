@@ -1,6 +1,7 @@
 const express = require('express')
 const app = express()
 const cors = require('cors')
+const jwt = require('jsonwebtoken')
 const dotenv = require("dotenv")
 dotenv.config()
 const port = process.env.PORT || 5000;
@@ -38,6 +39,15 @@ async function run() {
         // Connect the client to the server	(optional starting in v4.7)
 
         // await client.connect();
+
+        //create jwt
+        app.post('/jwt', async(req,res)=>{
+            const user = req.body;
+            const token = jwt.sign({ user }, process.env.ACCESS_TOKEN, { expiresIn: '1h' });
+            res.send({ token });
+        })
+
+        //blog related api
         app.post('/blogs', async (req, res) => {
             const blog = req.body;
             const result = await CollectionOfBlogs.insertOne(blog);
