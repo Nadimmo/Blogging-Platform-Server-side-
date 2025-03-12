@@ -43,7 +43,7 @@ async function run() {
             if (!req.headers.authorization) {
                 return res.status(401).json({ message: 'No token provided.' });
             }
-            console.log(req.headers)
+            // console.log(req.headers)
             const token = req.headers.authorization.split(' ')[1];
             console.log('token', token)
             jwt.verify(token, process.env.ACCESS_TOKEN, (err, decoded) => {
@@ -64,7 +64,7 @@ async function run() {
 
 
         //blog related api
-        app.post('/blogs', verifyToken, async (req, res) => {
+        app.post('/blogs',  async (req, res) => {
             const blog = req.body;
             const result = await CollectionOfBlogs.insertOne(blog);
             res.send(result);
@@ -82,7 +82,7 @@ async function run() {
             res.send(blog);
         });
 
-        app.delete("/blogs/:id", verifyToken, async (req, res) => {
+        app.delete("/blogs/:id", async (req, res) => {
             const id = req.params.id;
             const filter = { _id: new ObjectId(id) }
             const result = await CollectionOfBlogs.deleteOne(filter)
@@ -265,7 +265,7 @@ async function run() {
             res.send(result)
         })
         //make admin
-        app.put('/users/makeAdmin/:id', async(req,res)=>{
+        app.put('/users/makeAdmin/:id', verifyToken, async(req,res)=>{
             const ID = req.params.id;
             const filter = {_id: new ObjectId(ID)}
             const updateDoc = {
@@ -273,6 +273,20 @@ async function run() {
             }
             const result = await CollectionOfAllUsers.updateOne(filter,updateDoc)
             res.send(result)
+        })
+        //check admin
+        app.get('/users/checkAdmin/:email', verifyToken, async(req,res)=>{
+            const email = req.params.email;
+            if(email !== req.decoded.email){
+                return res.status(401).send('Not an admin')
+            }
+            const filter = {email: email}
+            const user = await CollectionOfAllUsers.findOne(filter)
+            let isAdmin = false
+            if(user){
+                isAdmin = user?.role === "admin"
+            }
+            res.send({isAdmin})
         })
 
 
