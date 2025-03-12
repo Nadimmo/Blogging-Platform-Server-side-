@@ -39,34 +39,50 @@ async function run() {
         // Connect the client to the server	(optional starting in v4.7)
 
         // await client.connect();
+        const verifyToken = (req, res, next) => {
+            if (!req.headers.authorization) {
+                return res.status(401).json({ message: 'No token provided.' });
+            }
+            console.log(req.headers)
+            const token = req.headers.authorization.split(' ')[1];
+            console.log('token', token)
+            jwt.verify(token, process.env.ACCESS_TOKEN, (err, decoded) => {
+                if (err) {
+                    return res.status(403).json({ message: 'Token is not valid.' });
+                }
+                req.decoded = decoded
+                next();
+            });
+        }
 
         //create jwt
-        app.post('/jwt', async(req,res)=>{
+        app.post('/jwt', async (req, res) => {
             const user = req.body;
             const token = jwt.sign({ user }, process.env.ACCESS_TOKEN, { expiresIn: '1h' });
             res.send({ token });
         })
 
+
         //blog related api
-        app.post('/blogs', async (req, res) => {
+        app.post('/blogs', verifyToken, async (req, res) => {
             const blog = req.body;
             const result = await CollectionOfBlogs.insertOne(blog);
             res.send(result);
         });
 
-        app.get('/blogs', async (req, res) => {
+        app.get('/blogs',  async (req, res) => {
             const blogs = await CollectionOfBlogs.find().toArray();
             res.send(blogs);
         });
 
-        app.get('/blogs/:id', async (req, res) => {
+        app.get('/blogs/:id',  async (req, res) => {
             const id = req.params.id;
             const filter = { _id: new ObjectId(id) }
             const blog = await CollectionOfBlogs.findOne(filter);
             res.send(blog);
         });
 
-        app.delete("/blogs/:id", async (req, res) => {
+        app.delete("/blogs/:id", verifyToken, async (req, res) => {
             const id = req.params.id;
             const filter = { _id: new ObjectId(id) }
             const result = await CollectionOfBlogs.deleteOne(filter)
@@ -79,20 +95,20 @@ async function run() {
         })
 
         //showing blog of a specific user
-        app.get('/blog', async (req, res) => {
+        app.get('/blog', verifyToken, async (req, res) => {
             const email = req.query.email;
             const filter = { email: email }
             const blog = await CollectionOfBlogs.find(filter).toArray();
             res.send(blog);
         });
-        app.get("/blog/:id", async (req, res) => {
+        app.get("/blog/:id", verifyToken, async (req, res) => {
             const id = req.params.id;
             const filter = { _id: new ObjectId(id) }
             const blog = await CollectionOfBlogs.findOne(filter)
             res.send(blog)
         })
         //update my blog
-        app.put("/blog/:id", async (req, res) => {
+        app.put("/blog/:id", verifyToken, async (req, res) => {
             const id = req.params.id;
             const updatedBlog = req.body;
             const filter = { _id: new ObjectId(id) }
@@ -127,7 +143,7 @@ async function run() {
         })
         app.get("/review/:id", async (req, res) => {
             const Id = req.params.id;
-            const filter = {_id: new ObjectId(Id)}
+            const filter = { _id: new ObjectId(Id) }
             const result = await CollectionOfReview.findOne(filter)
             res.send(result)
         })
@@ -172,7 +188,7 @@ async function run() {
         })
         app.get("/profiles/:id", async (req, res) => {
             const Id = req.params.id;
-            const filter = {_id: new ObjectId(Id)} 
+            const filter = { _id: new ObjectId(Id) }
             const result = await CollectionOfProfile.findOne(filter)
             res.send(result)
         })
