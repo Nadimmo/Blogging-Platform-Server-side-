@@ -147,13 +147,13 @@ async function run() {
             const result = await CollectionOfReview.findOne(filter)
             res.send(result)
         })
-        app.delete("/review/:id", async (req, res) => {
+        app.delete("/review/:id", verifyToken, async (req, res) => {
             const id = req.params.id;
             const filter = { _id: new ObjectId(id) }
             const result = await CollectionOfReview.deleteOne(filter)
             res.send(result)
         })
-        app.put("/review/:id", async (req, res) => {
+        app.put("/review/:id", verifyToken, async (req, res) => {
             const id = req.params.id;
             const updatedReview = req.body;
             const filter = { _id: new ObjectId(id) }
@@ -221,7 +221,7 @@ async function run() {
         })
 
         //save blogs related api
-        app.post('/save-blogs', async (req, res) => {
+        app.post('/save-blogs',verifyToken, async (req, res) => {
             const { blogId, email } = req.body;  // Fix destructuring
 
             if (!blogId || !email) {
@@ -236,7 +236,7 @@ async function run() {
             const result = await CollectionOfSaveBlogs.insertOne({ blogId, email });
             res.send(result);
         });
-        app.get('/saved-blogs', async (req, res) => {
+        app.get('/saved-blogs', verifyToken, async (req, res) => {
             const email = req.query.email;
             const savedBlogs = await CollectionOfSaveBlogs.find({ email }).toArray();
             res.send(savedBlogs);
@@ -253,12 +253,12 @@ async function run() {
             const result = await CollectionOfAllUsers.insertOne(user);
             res.send(result);
         });
-        app.get('/users', async (req, res) => {
+        app.get('/users', verifyToken,async (req, res) => {
             const users = req.body;
             const result = await CollectionOfAllUsers.find(users).toArray();
             res.send(result);
         })
-        app.delete("/users/:id", async (req, res) => {
+        app.delete("/users/:id", verifyToken, async (req, res) => {
             const Id = req.params.id;
             const filter = { _id: new ObjectId(Id) }
             const result = await CollectionOfAllUsers.deleteOne(filter)
