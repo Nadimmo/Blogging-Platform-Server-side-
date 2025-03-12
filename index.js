@@ -70,12 +70,12 @@ async function run() {
             res.send(result);
         });
 
-        app.get('/blogs',  async (req, res) => {
+        app.get('/blogs', async (req, res) => {
             const blogs = await CollectionOfBlogs.find().toArray();
             res.send(blogs);
         });
 
-        app.get('/blogs/:id',  async (req, res) => {
+        app.get('/blogs/:id', async (req, res) => {
             const id = req.params.id;
             const filter = { _id: new ObjectId(id) }
             const blog = await CollectionOfBlogs.findOne(filter);
@@ -221,7 +221,7 @@ async function run() {
         })
 
         //save blogs related api
-        app.post('/save-blogs',verifyToken, async (req, res) => {
+        app.post('/save-blogs', verifyToken, async (req, res) => {
             const { blogId, email } = req.body;  // Fix destructuring
 
             if (!blogId || !email) {
@@ -253,7 +253,7 @@ async function run() {
             const result = await CollectionOfAllUsers.insertOne(user);
             res.send(result);
         });
-        app.get('/users', verifyToken,async (req, res) => {
+        app.get('/users', verifyToken, async (req, res) => {
             const users = req.body;
             const result = await CollectionOfAllUsers.find(users).toArray();
             res.send(result);
@@ -262,6 +262,16 @@ async function run() {
             const Id = req.params.id;
             const filter = { _id: new ObjectId(Id) }
             const result = await CollectionOfAllUsers.deleteOne(filter)
+            res.send(result)
+        })
+        //make admin
+        app.put('/users/makeAdmin/:id', async(req,res)=>{
+            const ID = req.params.id;
+            const filter = {_id: new ObjectId(ID)}
+            const updateDoc = {
+                $set: {role: "admin"}
+            }
+            const result = await CollectionOfAllUsers.updateOne(filter,updateDoc)
             res.send(result)
         })
 
