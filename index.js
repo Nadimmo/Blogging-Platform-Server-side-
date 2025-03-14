@@ -46,21 +46,33 @@ async function run() {
         })
 
         //verify token
-        const verifyToken = (req,res,next)=>{
-            if(!req.headers.authorization){
-                return res.status(401).send({message: "UnAuthorize Access"})
+        const verifyToken = (req, res, next) => {
+            if (!req.headers.authorization) {
+                return res.status(401).send({ message: "UnAuthorize Access" })
             }
             const token = req.headers.authorization.split(' ')[1];
             console.log("token", token)
-            jwt.verify(token, process.env.ACCESS_TOKEN, (error , decoded)=>{
-                if(error){
-                    return res.status(403).send({message: "Token is not valid"})
+            jwt.verify(token, process.env.ACCESS_TOKEN, (error, decoded) => {
+                if (error) {
+                    return res.status(403).send({ message: "Token is not valid" })
                 }
                 req.decoded = decoded
                 // console.log(req.decoded)
                 // console.log("email form token", req.decoded.user.email)
                 next();
             })
+        }
+
+        //verify admin
+        const verifyAdmin = async (req, res, next) => {
+            const email = req.decoded.user.email;
+            const filter = { email: email }
+            const result = await CollectionOfAllUsers.findOne(filter)
+            const isAdmin = result.role === "admin"
+            if (!isAdmin) {
+                return res.status(403).send({ message: "Not authorized to perform this action" })
+            }
+            next()
         }
 
         //blog related api
@@ -147,13 +159,13 @@ async function run() {
             const result = await CollectionOfReview.findOne(filter)
             res.send(result)
         })
-        app.delete("/review/:id", verifyToken, async (req, res) => {
+        app.delete("/review/:id", verifyToken, verifyAdmin, async (req, res) => {
             const id = req.params.id;
             const filter = { _id: new ObjectId(id) }
             const result = await CollectionOfReview.deleteOne(filter)
             res.send(result)
         })
-        app.put("/review/:id", verifyToken, async (req, res) => {
+        app.put("/review/:id", verifyToken, verifyAdmin, async (req, res) => {
             const id = req.params.id;
             const updatedReview = req.body;
             const filter = { _id: new ObjectId(id) }
@@ -175,13 +187,13 @@ async function run() {
             res.send(result);
         })
         //get profile of a specific user
-        app.get("/profile", async (req, res) => {
+        app.get("/profile", verifyToken, async (req, res) => {
             const user = req.query;
             const filter = { email: user.email }
             const result = await CollectionOfProfile.find(filter).toArray()
             res.send(result)
         })
-        app.get("/profiles", async (req, res) => {
+        app.get("/profiles", verifyToken, async (req, res) => {
             const user = req.body;
             const result = await CollectionOfProfile.find(user).toArray()
             res.send(result)
@@ -264,14 +276,14 @@ async function run() {
             const result = await CollectionOfAllUsers.findOne(filter)
             res.send(result)
         })
-        app.delete("/users/:id", verifyToken, async (req, res) => {
+        app.delete("/users/:id", verifyToken, verifyAdmin, async (req, res) => {
             const Id = req.params.id;
             const filter = { _id: new ObjectId(Id) }
             const result = await CollectionOfAllUsers.deleteOne(filter)
             res.send(result)
         })
         //make admin
-        app.put('/users/admin/:id', verifyToken, async (req, res) => {
+        app.put('/users/admin/:id', verifyToken, verifyAdmin, async (req, res) => {
             const ID = req.params.id;
             const filter = { _id: new ObjectId(ID) }
             const updateDoc = {
@@ -286,13 +298,13 @@ async function run() {
             if (email !== req.decoded.user.email) {
                 return res.status(401).send({ message: "Unauthorize access" })
             }
-            const filter = { email: email}
+            const filter = { email: email }
             const result = await CollectionOfAllUsers.findOne(filter)
             let admin = false;
             if (result) {
                 admin = result.role === "admin"
             }
-            res.send({  admin })
+            res.send({ admin })
         })
 
 
