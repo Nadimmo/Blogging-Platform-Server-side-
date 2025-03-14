@@ -37,24 +37,7 @@ async function run() {
     const CollectionOfProfile = client.db("BloggingPlatformDB").collection("profilesDB");
     try {
         // Connect the client to the server	(optional starting in v4.7)
-
         // await client.connect();
-        const verifyToken = (req, res, next) => {
-            if (!req.headers.authorization) {
-                return res.status(401).json({ message: 'No token provided.' });
-            }
-            // console.log(req.headers)
-            const token = req.headers.authorization.split(' ')[1];
-            console.log('token', token)
-            jwt.verify(token, process.env.ACCESS_TOKEN, (err, decoded) => {
-                if (err) {
-                    return res.status(403).json({ message: 'Token is not valid.' });
-                }
-                req.decoded = decoded
-                next();
-            });
-        }
-
         //create jwt
         app.post('/jwt', async (req, res) => {
             const user = req.body;
@@ -62,9 +45,26 @@ async function run() {
             res.send({ token });
         })
 
+        //verify token
+        const verifyToken = (req,res,next)=>{
+            if(!req.headers.authorization){
+                return res.status(401).send({message: "UnAuthorize Access"})
+            }
+            const token = req.headers.authorization.split(' ')[1];
+            console.log("token", token)
+            jwt.verify(token, process.env.ACCESS_TOKEN, (error , decoded)=>{
+                if(error){
+                    return res.status(403).send({message: "Token is not valid"})
+                }
+                req.decoded = decoded
+                // console.log(req.decoded)
+                // console.log("email form token", req.decoded.user.email)
+                next();
+            })
+        }
 
         //blog related api
-        app.post('/blogs',  async (req, res) => {
+        app.post('/blogs', async (req, res) => {
             const blog = req.body;
             const result = await CollectionOfBlogs.insertOne(blog);
             res.send(result);
@@ -258,6 +258,12 @@ async function run() {
             const result = await CollectionOfAllUsers.find(users).toArray();
             res.send(result);
         })
+        app.get("/users/:id", verifyToken, async (req, res) => {
+            const Id = req.params.id;
+            const filter = { _id: new ObjectId(Id) }
+            const result = await CollectionOfAllUsers.findOne(filter)
+            res.send(result)
+        })
         app.delete("/users/:id", verifyToken, async (req, res) => {
             const Id = req.params.id;
             const filter = { _id: new ObjectId(Id) }
@@ -265,28 +271,28 @@ async function run() {
             res.send(result)
         })
         //make admin
-        app.put('/users/makeAdmin/:id', verifyToken, async(req,res)=>{
+        app.put('/users/admin/:id', verifyToken, async (req, res) => {
             const ID = req.params.id;
-            const filter = {_id: new ObjectId(ID)}
+            const filter = { _id: new ObjectId(ID) }
             const updateDoc = {
-                $set: {role: "admin"}
+                $set: { role: "admin" }
             }
-            const result = await CollectionOfAllUsers.updateOne(filter,updateDoc)
+            const result = await CollectionOfAllUsers.updateOne(filter, updateDoc)
             res.send(result)
         })
         //check admin
-        app.get('/users/checkAdmin/:email', verifyToken, async(req,res)=>{
+        app.get("/users/admin/:email", verifyToken, async (req, res) => {
             const email = req.params.email;
-            if(email !== req.decoded.email){
-                return res.status(401).send('Not an admin')
+            if (email !== req.decoded.user.email) {
+                return res.status(401).send({ message: "Unauthorize access" })
             }
-            const filter = {email: email}
-            const user = await CollectionOfAllUsers.findOne(filter)
-            let isAdmin = false
-            if(user){
-                isAdmin = user?.role === "admin"
+            const filter = { email: email}
+            const result = await CollectionOfAllUsers.findOne(filter)
+            let admin = false;
+            if (result) {
+                admin = result.role === "admin"
             }
-            res.send({isAdmin})
+            res.send({  admin })
         })
 
 
