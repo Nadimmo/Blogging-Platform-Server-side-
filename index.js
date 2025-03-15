@@ -35,6 +35,7 @@ async function run() {
     const CollectionOfSaveBlogs = client.db("BloggingPlatformDB").collection("saveBlogsDB");
     const CollectionOfAllUsers = client.db("BloggingPlatformDB").collection("usersDB");
     const CollectionOfProfile = client.db("BloggingPlatformDB").collection("profilesDB");
+    const CollectionOfAuthor = client.db("BloggingPlatformDB").collection("authorsDB");
     try {
         // Connect the client to the server	(optional starting in v4.7)
         // await client.connect();
@@ -233,7 +234,7 @@ async function run() {
         })
 
         //save blogs related api
-        app.post('/save-blogs', verifyToken, async (req, res) => {
+        app.post('/save-blogs', async (req, res) => {
             const { blogId, email } = req.body;  // Fix destructuring
 
             if (!blogId || !email) {
@@ -248,11 +249,30 @@ async function run() {
             const result = await CollectionOfSaveBlogs.insertOne({ blogId, email });
             res.send(result);
         });
-        app.get('/saved-blogs', verifyToken, async (req, res) => {
+        app.get('/saved-blogs', async (req, res) => {
             const email = req.query.email;
             const savedBlogs = await CollectionOfSaveBlogs.find({ email }).toArray();
             res.send(savedBlogs);
         });
+
+        //added new author
+        app.post("/addAuthor", async (req, res) => {
+            const author = req.body;
+            const result = await CollectionOfAuthor.insertOne(author)
+            res.send(result)
+        })
+        app.get("/authors", async (req, res) => {
+            const author = req.body;
+            const result = await CollectionOfAuthor.find(author).toArray()
+            res.send(result)
+        })
+        app.get("/authors/:id", async (req, res) => {
+            const Id = req.params.id;
+            const filter = { _id: new ObjectId(Id) }
+            const result = await CollectionOfAuthor.findOne(filter)
+            res.send(result)
+        })
+
 
         //user related api
         app.post('/users', async (req, res) => {
