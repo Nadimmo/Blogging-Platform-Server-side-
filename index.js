@@ -101,6 +101,27 @@ async function run() {
             const result = await CollectionOfBlogs.deleteOne(filter)
             res.send(result)
         })
+        //  create a update all blogs api for admin
+        app.put("/blogs/:id", verifyToken, verifyAdmin, async (req, res) => {
+            const id = req.params.id;
+            const updatedBlog = req.body;
+            const filter = { _id: new ObjectId(id) }
+            const updateDoc = {
+                $set: {
+                    title: updatedBlog.title,
+                    short_description: updatedBlog.short_description,
+                    blog_details: updatedBlog.blog_details,
+                    category: updatedBlog.category,
+                    author_name: updatedBlog.author_name,
+                    email: updatedBlog.email,
+                    date_time: updatedBlog.date_time,
+                    image: updatedBlog.image,
+                    likes: 0
+                }
+            }
+            const result = await CollectionOfBlogs.updateOne(filter, updateDoc)
+            res.send(result)
+        })
         //get latest blogs
         app.get('/latest-blogs', async (req, res) => {
             const blogs = await CollectionOfBlogs.find().sort({ date_time: -1 }).limit(5).toArray();
@@ -120,7 +141,7 @@ async function run() {
             const blog = await CollectionOfBlogs.findOne(filter)
             res.send(blog)
         })
-        //update my blog
+        //update my blog for a specific user
         app.put("/blog/:id", verifyToken, async (req, res) => {
             const id = req.params.id;
             const updatedBlog = req.body;
