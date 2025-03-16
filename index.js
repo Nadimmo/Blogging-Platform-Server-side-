@@ -76,13 +76,13 @@ async function run() {
             next()
         }
 
-        //blog related api
+        //write blog
         app.post('/blogs', async (req, res) => {
             const blog = req.body;
             const result = await CollectionOfBlogs.insertOne(blog);
             res.send(result);
         });
-
+        //get all blogs in blogs page
         app.get('/blogs', async (req, res) => {
             const blogs = await CollectionOfBlogs.find().toArray();
             res.send(blogs);
@@ -94,14 +94,14 @@ async function run() {
             const blog = await CollectionOfBlogs.findOne(filter);
             res.send(blog);
         });
-
+        
         app.delete("/blogs/:id", async (req, res) => {
             const id = req.params.id;
             const filter = { _id: new ObjectId(id) }
             const result = await CollectionOfBlogs.deleteOne(filter)
             res.send(result)
         })
-        //  create a update all blogs api for admin
+        //  update all blogs api for admin
         app.put("/blogs/:id", verifyToken, verifyAdmin, async (req, res) => {
             const id = req.params.id;
             const updatedBlog = req.body;
@@ -164,12 +164,13 @@ async function run() {
         })
 
 
-        //review related api
+        //submit review a user
         app.post('/review', async (req, res) => {
             const review = req.body;
             const result = await CollectionOfReview.insertOne(review);
             res.send(result);
         });
+        //get all review in home page
         app.get('/review', async (req, res) => {
             const review = req.body;
             const result = await CollectionOfReview.find(review).toArray();
@@ -181,12 +182,14 @@ async function run() {
             const result = await CollectionOfReview.findOne(filter)
             res.send(result)
         })
+        //delete review only admin
         app.delete("/review/:id", verifyToken, verifyAdmin, async (req, res) => {
             const id = req.params.id;
             const filter = { _id: new ObjectId(id) }
             const result = await CollectionOfReview.deleteOne(filter)
             res.send(result)
         })
+        //update review only admin
         app.put("/review/:id", verifyToken, verifyAdmin, async (req, res) => {
             const id = req.params.id;
             const updatedReview = req.body;
@@ -226,7 +229,7 @@ async function run() {
             const result = await CollectionOfProfile.findOne(filter)
             res.send(result)
         })
-        //update specific profile
+        //update specific profile a user
         app.put("/profiles/:id", async (req, res) => {
             const Id = req.params.id;
             const updatedProfile = req.body;
@@ -254,7 +257,7 @@ async function run() {
             res.send(result);
         })
 
-        //save blogs related api
+        //save blogs a user in all blogs page
         app.post('/save-blogs', async (req, res) => {
             const { blogId, email } = req.body;  // Fix destructuring
 
@@ -277,20 +280,44 @@ async function run() {
         });
 
         //added new author
-        app.post("/addAuthor", async (req, res) => {
+        app.post("/addAuthor", verifyToken, verifyAdmin, async (req, res) => {
             const author = req.body;
             const result = await CollectionOfAuthor.insertOne(author)
             res.send(result)
         })
-        app.get("/authors", async (req, res) => {
+        //get all authors in home page
+        app.get("/authors",  async (req, res) => {
             const author = req.body;
             const result = await CollectionOfAuthor.find(author).toArray()
             res.send(result)
         })
-        app.get("/authors/:id", async (req, res) => {
-            const Id = req.params.id;
-            const filter = { _id: new ObjectId(Id) }
+        //get all authors in manage authors page for admin
+        app.get("/author", verifyToken, verifyAdmin, async (req, res) => {
+            const author = req.body;
+            const result = await CollectionOfAuthor.find(author).toArray()
+            res.send(result)
+        })
+
+        app.get("/author/:id",   async (req, res) => {
+            const Id = req.params.id
+            const filter = {_id: new ObjectId(Id) }
             const result = await CollectionOfAuthor.findOne(filter)
+            res.send(result)
+        })
+        app.put("/author/:id", verifyToken, verifyAdmin, async (req, res) => {
+            const id = req.params.id;
+            const updatedAuthor = req.body;
+            const filter = {_id: new ObjectId(id) }
+            const updateDoc = {
+                $set: {
+                    name: updatedAuthor.name,
+                    bio: updatedAuthor.bio,
+                    designation: updatedAuthor.twitter,
+                    image: updatedAuthor.linkedin,
+                    image: updatedAuthor.github,
+                }
+            }
+            const result = await CollectionOfAuthor.updateOne(filter, updateDoc)
             res.send(result)
         })
 
