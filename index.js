@@ -94,7 +94,7 @@ async function run() {
             const blog = await CollectionOfBlogs.findOne(filter);
             res.send(blog);
         });
-        
+
         app.delete("/blogs/:id", async (req, res) => {
             const id = req.params.id;
             const filter = { _id: new ObjectId(id) }
@@ -286,7 +286,7 @@ async function run() {
             res.send(result)
         })
         //get all authors in home page
-        app.get("/authors",  async (req, res) => {
+        app.get("/authors", async (req, res) => {
             const author = req.body;
             const result = await CollectionOfAuthor.find(author).toArray()
             res.send(result)
@@ -298,16 +298,23 @@ async function run() {
             res.send(result)
         })
 
-        app.get("/author/:id",   async (req, res) => {
+        app.get("/author/:id", async (req, res) => {
             const Id = req.params.id
-            const filter = {_id: new ObjectId(Id) }
+            const filter = { _id: new ObjectId(Id) }
             const result = await CollectionOfAuthor.findOne(filter)
             res.send(result)
         })
+        app.delete("/author/:id", verifyToken, verifyAdmin, async (req, res) => {
+            const Id = req.params.id;
+            const filter = { _id: new ObjectId(Id) }
+            const result = await CollectionOfAuthor.deleteOne(filter)
+            res.send(result)
+        })
+        //update specific author a user
         app.put("/author/:id", verifyToken, verifyAdmin, async (req, res) => {
             const id = req.params.id;
             const updatedAuthor = req.body;
-            const filter = {_id: new ObjectId(id) }
+            const filter = { _id: new ObjectId(id) }
             const updateDoc = {
                 $set: {
                     name: updatedAuthor.name,
