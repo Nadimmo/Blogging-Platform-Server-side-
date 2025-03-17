@@ -8,7 +8,7 @@ const port = process.env.PORT || 5000;
 
 app.use(express.json())
 app.use(cors({
-    origin: ["https://blogging-platform-5850d.firebaseapp.com/", "https://blogging-platform-5850d.web.app/", "http://localhost:5173"],
+    origin: ["https://blogging-platform-5850d.web.app", "https://blogging-platform-5850d.web.app", "http://localhost:5173"],
     methods: "GET, POST, PUT, DELETE",
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization"]
